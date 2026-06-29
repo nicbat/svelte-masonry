@@ -6,3 +6,4 @@
  * without breaking call sites.
  */
 export { default as Masonry } from './Masonry.svelte';
+export type { MasonryProps, MasonryLayoutInfo } from './types.js';

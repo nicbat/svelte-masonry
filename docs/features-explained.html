@@ -1,0 +1,1141 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>@nicbat/svelte-masonry — roadmap features, explained visually</title>
+		<style>
+			:root {
+				--bg: #0f1115;
+				--panel: #171a21;
+				--panel-2: #1e222b;
+				--line: #2a2f3a;
+				--text: #e6e9ef;
+				--muted: #9aa3b2;
+				--accent: #6ea8fe;
+				--accent-2: #7ee0c0;
+				--warn: #ffcf6e;
+				--bad: #ff8f8f;
+				--violet: #b69cff;
+				--radius: 12px;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html {
+				scroll-behavior: smooth;
+			}
+			body {
+				margin: 0;
+				background: var(--bg);
+				color: var(--text);
+				font:
+					15px/1.6 ui-sans-serif,
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					sans-serif;
+			}
+			a {
+				color: var(--accent);
+			}
+			code,
+			.mono {
+				font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+				font-size: 0.9em;
+			}
+			code {
+				color: var(--accent-2);
+				background: #ffffff08;
+				padding: 1px 5px;
+				border-radius: 5px;
+			}
+			.wrap {
+				max-width: 1180px;
+				margin: 0 auto;
+				padding: 0 24px;
+			}
+
+			header.hero {
+				padding: 40px 0 18px;
+				border-bottom: 1px solid var(--line);
+			}
+			header.hero h1 {
+				margin: 0 0 6px;
+				font-size: 26px;
+				letter-spacing: 0.2px;
+			}
+			header.hero p {
+				margin: 0;
+				color: var(--muted);
+				max-width: 75ch;
+			}
+
+			.layout {
+				display: grid;
+				grid-template-columns: 220px 1fr;
+				gap: 36px;
+				padding: 28px 0 80px;
+			}
+			@media (max-width: 880px) {
+				.layout {
+					grid-template-columns: 1fr;
+				}
+				nav.toc {
+					position: static !important;
+				}
+			}
+
+			nav.toc {
+				position: sticky;
+				top: 18px;
+				align-self: start;
+				font-size: 13.5px;
+				max-height: calc(100vh - 36px);
+				overflow: auto;
+			}
+			nav.toc .phase {
+				color: var(--muted);
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+				font-size: 11px;
+				font-weight: 700;
+				margin: 16px 0 6px;
+			}
+			nav.toc a {
+				display: block;
+				color: var(--text);
+				text-decoration: none;
+				padding: 4px 8px;
+				border-left: 2px solid transparent;
+				border-radius: 0 6px 6px 0;
+			}
+			nav.toc a:hover {
+				background: #ffffff08;
+				border-left-color: var(--accent);
+			}
+
+			section.feature {
+				border-top: 1px solid var(--line);
+				padding: 30px 0;
+				scroll-margin-top: 18px;
+			}
+			section.feature:first-of-type {
+				border-top: none;
+			}
+			.tagline {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				flex-wrap: wrap;
+			}
+			h2 {
+				font-size: 21px;
+				margin: 0;
+			}
+			.chip {
+				font-size: 11px;
+				font-weight: 700;
+				letter-spacing: 0.06em;
+				text-transform: uppercase;
+				padding: 3px 9px;
+				border-radius: 999px;
+				border: 1px solid var(--line);
+				white-space: nowrap;
+			}
+			.chip.core {
+				color: var(--accent-2);
+				border-color: #2f6b58;
+				background: #7ee0c012;
+			}
+			.chip.optin {
+				color: var(--accent);
+				border-color: #2f4d7a;
+				background: #6ea8fe12;
+			}
+			.chip.addon {
+				color: var(--violet);
+				border-color: #4a3f73;
+				background: #b69cff12;
+			}
+			.chip.docs {
+				color: var(--warn);
+				border-color: #6b5a2f;
+				background: #ffcf6e12;
+			}
+			.chip.nope {
+				color: var(--bad);
+				border-color: #6b2f2f;
+				background: #ff8f8f12;
+			}
+
+			.lead {
+				color: var(--muted);
+				margin: 10px 0 18px;
+				max-width: 80ch;
+			}
+			.grid2 {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 18px;
+				align-items: stretch;
+			}
+			@media (max-width: 720px) {
+				.grid2 {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			.card {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: var(--radius);
+				padding: 16px;
+			}
+			.card h4 {
+				margin: 0 0 10px;
+				font-size: 13px;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+				color: var(--muted);
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+			.card.bad {
+				border-color: #5a2f2f;
+			}
+			.card.good {
+				border-color: #2f5a4a;
+			}
+			.dot {
+				width: 9px;
+				height: 9px;
+				border-radius: 50%;
+				display: inline-block;
+			}
+			.dot.r {
+				background: var(--bad);
+			}
+			.dot.g {
+				background: var(--accent-2);
+			}
+
+			pre {
+				background: #0b0d12;
+				border: 1px solid var(--line);
+				border-radius: 10px;
+				padding: 12px 14px;
+				overflow: auto;
+				margin: 0;
+			}
+			pre code {
+				background: none;
+				color: #d7def0;
+				padding: 0;
+			}
+			.kw {
+				color: #c792ea;
+			}
+			.fn {
+				color: var(--accent);
+			}
+			.str {
+				color: var(--accent-2);
+			}
+			.cm {
+				color: #6b7280;
+			}
+			.pr {
+				color: var(--warn);
+			}
+
+			/* tile mockups */
+			.masonry-mock {
+				display: flex;
+				gap: 8px;
+				align-items: flex-start;
+			}
+			.col {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				flex: 1;
+			}
+			.t {
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+				color: #0b0d12;
+				font-size: 14px;
+				border: 1px solid #ffffff14;
+			}
+			.callout {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-left: 3px solid var(--accent);
+				border-radius: 8px;
+				padding: 12px 14px;
+				margin: 16px 0 0;
+				color: var(--muted);
+			}
+			.callout strong {
+				color: var(--text);
+			}
+			.callout.warn {
+				border-left-color: var(--warn);
+			}
+			.callout.good {
+				border-left-color: var(--accent-2);
+			}
+
+			button.play {
+				background: var(--panel-2);
+				color: var(--text);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 7px 12px;
+				font: inherit;
+				cursor: pointer;
+			}
+			button.play:hover {
+				border-color: var(--accent);
+			}
+			.legend-row {
+				display: flex;
+				gap: 16px;
+				flex-wrap: wrap;
+				color: var(--muted);
+				font-size: 13px;
+				margin-top: 10px;
+			}
+			.legend-row span {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			svg {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+			.center {
+				text-align: center;
+				color: var(--muted);
+				font-size: 13px;
+				margin-top: 8px;
+			}
+			footer.end {
+				border-top: 1px solid var(--line);
+				padding: 24px 0 60px;
+				color: var(--muted);
+			}
+		</style>
+	</head>
+	<body>
+		<header class="hero">
+			<div class="wrap">
+				<h1>Roadmap features, explained visually</h1>
+				<p>
+					A plain-language, diagram-first companion to
+					<a href="./MASONRY-RESEARCH.md">MASONRY-RESEARCH.md</a>. Each card answers:
+					<em>what is this, what problem does it solve, and what changes?</em> Tags:
+					<span class="chip core">core</span> in the tiny component ·
+					<span class="chip optin">opt-in</span> a prop, off by default ·
+					<span class="chip addon">add-on</span> separate module ·
+					<span class="chip docs">docs</span> · <span class="chip nope">non-goal</span>. See the
+					live algorithm in <a href="./playground.html">playground.html</a>.
+				</p>
+			</div>
+		</header>
+
+		<div class="wrap layout">
+			<nav class="toc">
+				<div class="phase">Now</div>
+				<a href="#reading-order">1 · Reading / focus order</a>
+				<a href="#passthrough">2 · Pass-through props</a>
+				<a href="#heightestimate">3 · heightEstimate()</a>
+				<a href="#gaps">4 · column/row gap</a>
+				<a href="#onlayout">5 · onlayout callback</a>
+				<div class="phase">Next</div>
+				<a href="#ssr">6 · SSR flash / initialColumns</a>
+				<a href="#breakpoints">7 · Breakpoint columns</a>
+				<a href="#states">8 · Empty / loading</a>
+				<a href="#flip">10 · FLIP animation</a>
+				<div class="phase">Later (deferred)</div>
+				<a href="#virtual">9 · Virtualization</a>
+				<a href="#native">11 · Native grid-lanes</a>
+				<a href="#nongoals">12 · Non-goals</a>
+			</nav>
+
+			<main>
+				<!-- 1. READING ORDER -->
+				<section class="feature" id="reading-order">
+					<div class="tagline">
+						<h2>1 · Reading &amp; focus order</h2>
+						<span class="chip docs">docs</span><span class="chip optin">opt-in later</span>
+					</div>
+					<p class="lead">
+						The most important one to understand. The grid looks correct, but a keyboard or
+						screen-reader user travels through it in a different order than your eyes do.
+					</p>
+
+					<div class="grid2">
+						<div class="card good">
+							<h4><span class="dot g"></span>What your eyes see (visual order)</h4>
+							<div class="masonry-mock" id="ro-visual"></div>
+							<p class="center">Reads left→right, top→bottom: 1, 2, 3, 4, 5 …</p>
+						</div>
+						<div class="card bad">
+							<h4><span class="dot r"></span>What Tab / a screen reader follows (DOM order)</h4>
+							<div class="masonry-mock" id="ro-dom"></div>
+							<p class="center" id="ro-domseq">Runs down each column: 1, 4, 7 → 2, 5, 8 → …</p>
+						</div>
+					</div>
+
+					<div
+						style="margin-top: 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap"
+					>
+						<button class="play" id="ro-play">▶ Play screen-reader traversal</button>
+						<span style="color: var(--muted); font-size: 13px"
+							>Watch the highlight jump down column 1, then column 2…</span
+						>
+					</div>
+
+					<div class="callout warn">
+						<strong>Why it happens:</strong> to guarantee a tile can never be clipped, each column
+						is its own DOM container and items are placed <em>into</em> those columns. So the DOM
+						ends up column-major even though the visuals are row-major.
+						<strong>The fix isn't free</strong> — it's the trade-off of this whole approach. For a
+						photo wall it's harmless; for cards with headings/prices/links it can violate WCAG 1.3.2
+						(Meaningful Sequence). Plan: <strong>(1)</strong> document it loudly now,
+						<strong>(2)</strong> offer an opt-in single-flow mode, <strong>(3)</strong> adopt native
+						<code>grid-lanes</code> which preserves source order (see #11).
+					</div>
+				</section>
+
+				<!-- 2. PASSTHROUGH -->
+				<section class="feature" id="passthrough">
+					<div class="tagline">
+						<h2>
+							2 · Pass-through props (<code>class</code>, <code>style</code>, <code>id</code>, …)
+						</h2>
+						<span class="chip core">core</span>
+					</div>
+					<p class="lead">
+						Right now the component renders a fixed <code>&lt;div class="masonry"&gt;</code> and
+						gives you no way to hook your own styling, ids, or attributes onto it. "Pass-through"
+						just means: forward any extra attributes you put on the component straight onto that
+						root element.
+					</p>
+					<div class="grid2">
+						<div class="card bad">
+							<h4><span class="dot r"></span>Today — can't reach the root</h4>
+							<pre><code><span class="cm">&lt;!-- class is ignored; nowhere to put an id --&gt;</span>
+&lt;<span class="fn">Masonry</span> <span class="pr">class</span>=<span class="str">"gallery"</span> <span class="pr">id</span>=<span class="str">"feed"</span> … /&gt;</code></pre>
+							<p class="center">
+								You end up wrapping it in an extra <code>&lt;div&gt;</code> just to style it.
+							</p>
+						</div>
+						<div class="card good">
+							<h4><span class="dot g"></span>With pass-through</h4>
+							<pre><code>&lt;<span class="fn">Masonry</span>
+  <span class="pr">class</span>=<span class="str">"gallery"</span>
+  <span class="pr">id</span>=<span class="str">"feed"</span>
+  <span class="pr">data-testid</span>=<span class="str">"grid"</span>
+  …
+/&gt;
+<span class="cm">// → all land on the real root element</span></code></pre>
+							<p class="center">Style and target it directly. No wrapper needed.</p>
+						</div>
+					</div>
+					<div class="callout">
+						Tiny change, big ergonomics win — this is the #1 thing that makes a library feel "usable
+						in any repo" vs. "I had to fork it."
+					</div>
+				</section>
+
+				<!-- 3. HEIGHTESTIMATE -->
+				<section class="feature" id="heightestimate">
+					<div class="tagline">
+						<h2>3 · <code>heightEstimate()</code> — one escape hatch</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						Reminder: the library guesses each tile's height <em>only</em> to decide which column it
+						joins. Today that guess is built from two separate props. This feature replaces them
+						with one optional function for full control — while keeping the simple props as sugar.
+					</p>
+
+					<div class="card">
+						<h4>How the height guess is assembled today</h4>
+						<svg viewBox="0 0 640 150" role="img" aria-label="estimate = image height plus footer">
+							<!-- image part -->
+							<rect
+								x="20"
+								y="20"
+								width="150"
+								height="80"
+								rx="6"
+								fill="#6ea8fe22"
+								stroke="#6ea8fe"
+							/>
+							<text x="95" y="55" text-anchor="middle" fill="#e6e9ef" font-size="12">image</text>
+							<text x="95" y="72" text-anchor="middle" fill="#9aa3b2" font-size="11">
+								colWidth ÷ aspectRatio
+							</text>
+							<text x="185" y="65" fill="#9aa3b2" font-size="22">+</text>
+							<!-- footer part -->
+							<rect
+								x="210"
+								y="60"
+								width="150"
+								height="40"
+								rx="6"
+								fill="#ffcf6e22"
+								stroke="#ffcf6e"
+							/>
+							<text x="285" y="78" text-anchor="middle" fill="#e6e9ef" font-size="12">footer</text>
+							<text x="285" y="93" text-anchor="middle" fill="#9aa3b2" font-size="11">
+								footerEstimate (flat)
+							</text>
+							<text x="378" y="65" fill="#9aa3b2" font-size="22">=</text>
+							<!-- result -->
+							<rect
+								x="405"
+								y="20"
+								width="150"
+								height="80"
+								rx="6"
+								fill="#7ee0c022"
+								stroke="#7ee0c0"
+							/>
+							<text x="480" y="55" text-anchor="middle" fill="#e6e9ef" font-size="12">
+								estimated height
+							</text>
+							<text x="480" y="72" text-anchor="middle" fill="#9aa3b2" font-size="11">
+								used to pick a column
+							</text>
+							<text x="320" y="135" text-anchor="middle" fill="#9aa3b2" font-size="12.5">
+								The estimate never becomes the tile's real height — a wrong guess only mis-balances
+								slightly.
+							</text>
+						</svg>
+					</div>
+
+					<div class="grid2" style="margin-top: 16px">
+						<div class="card">
+							<h4>The limitation</h4>
+							<p style="margin: 0; color: var(--muted)">
+								<code>footerEstimate</code> is a single flat number for every tile. But a card with
+								a 1-line caption and one with a 4-line caption have very different chrome. You can't
+								express that today.
+							</p>
+						</div>
+						<div class="card good">
+							<h4>One general function</h4>
+							<pre><code><span class="cm">// total estimate for this item, your call:</span>
+<span class="pr">heightEstimate</span>=<span class="kw">{</span>(item, colWidth) =&gt;
+  colWidth / item.ratio        <span class="cm">// image</span>
+  + item.lines * <span class="str">20</span>          <span class="cm">// caption</span>
+  + (item.hasChips ? <span class="str">32</span> : <span class="str">0</span>) <span class="cm">// chips</span>
+<span class="kw">}</span></code></pre>
+						</div>
+					</div>
+					<div class="callout good">
+						<code>aspectRatio</code> + <code>footerEstimate</code> stay as the easy path;
+						<code>heightEstimate</code> is the "I need precise balancing" override. One concept,
+						fully general, still measurement-free.
+					</div>
+				</section>
+
+				<!-- 4. GAPS -->
+				<section class="feature" id="gaps">
+					<div class="tagline">
+						<h2>4 · Separate <code>columnGap</code> / <code>rowGap</code></h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						Today one <code>gap</code> controls both the space between columns and between stacked
+						tiles. Some designs want them different (tight columns, airy rows). This splits them,
+						keeping <code>gap</code> as a shorthand.
+					</p>
+					<div class="grid2">
+						<div class="card">
+							<h4>One gap (today)</h4>
+							<div class="masonry-mock" id="gap-uniform"></div>
+							<p class="center"><code>gap = 14</code> everywhere</p>
+						</div>
+						<div class="card good">
+							<h4>Independent gaps</h4>
+							<div class="masonry-mock" id="gap-split"></div>
+							<p class="center"><code>columnGap = 24</code>, <code>rowGap = 6</code></p>
+						</div>
+					</div>
+				</section>
+
+				<!-- 5. ONLAYOUT -->
+				<section class="feature" id="onlayout">
+					<div class="tagline">
+						<h2>5 · <code>onlayout</code> / <code>oncolumnchange</code> callback</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						A small notification: the component tells <em>you</em> whenever it recalculates — how
+						many columns it chose and how wide they are. It changes no behavior; it just lets your
+						code react (analytics, "showing N columns" labels, triggering image preloads, etc.).
+					</p>
+					<div class="card">
+						<svg viewBox="0 0 640 120" role="img" aria-label="resize triggers onlayout event">
+							<rect x="20" y="40" width="120" height="44" rx="8" fill="#1e222b" stroke="#2a2f3a" />
+							<text x="80" y="67" text-anchor="middle" fill="#e6e9ef" font-size="12">
+								window resizes
+							</text>
+							<path d="M145 62 H210" stroke="#6ea8fe" stroke-width="2" marker-end="url(#arrow)" />
+							<rect x="215" y="40" width="150" height="44" rx="8" fill="#1e222b" stroke="#2a2f3a" />
+							<text x="290" y="61" text-anchor="middle" fill="#e6e9ef" font-size="12">
+								columns recompute
+							</text>
+							<text x="290" y="76" text-anchor="middle" fill="#9aa3b2" font-size="10.5">
+								4 → 3 columns
+							</text>
+							<path d="M370 62 H435" stroke="#7ee0c0" stroke-width="2" marker-end="url(#arrow2)" />
+							<rect
+								x="440"
+								y="34"
+								width="180"
+								height="56"
+								rx="8"
+								fill="#7ee0c012"
+								stroke="#7ee0c0"
+							/>
+							<text x="530" y="56" text-anchor="middle" fill="#7ee0c0" font-size="12">
+								onlayout fires
+							</text>
+							<text x="530" y="73" text-anchor="middle" fill="#9aa3b2" font-size="10.5">
+								{ columnCount: 3, columnWidth: 240 }
+							</text>
+							<defs>
+								<marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+									<path d="M0,0 L6,3 L0,6" fill="#6ea8fe" />
+								</marker>
+								<marker
+									id="arrow2"
+									markerWidth="8"
+									markerHeight="8"
+									refX="6"
+									refY="3"
+									orient="auto"
+								>
+									<path d="M0,0 L6,3 L0,6" fill="#7ee0c0" />
+								</marker>
+							</defs>
+						</svg>
+					</div>
+				</section>
+
+				<!-- 6. SSR -->
+				<section class="feature" id="ssr">
+					<div class="tagline">
+						<h2>6 · Kill the SSR flash (<code>initialColumns</code>)</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						On the server there's no window to measure, so width starts at 0 and the grid renders as
+						a
+						<strong>single tall column</strong>. The browser then measures and reflows into the real
+						columns — a visible "flash" / layout shift on first paint. This feature lets you tell it
+						how many columns to assume up front.
+					</p>
+					<div class="card">
+						<h4>First-paint timeline</h4>
+						<svg viewBox="0 0 640 210" role="img" aria-label="ssr flash timeline">
+							<!-- today row -->
+							<text x="0" y="34" fill="#ff8f8f" font-size="12" font-weight="700">Today</text>
+							<rect x="70" y="16" width="80" height="70" rx="6" fill="#ff8f8f18" stroke="#ff8f8f" />
+							<rect x="82" y="24" width="56" height="12" rx="2" fill="#ff8f8f66" />
+							<rect x="82" y="40" width="56" height="12" rx="2" fill="#ff8f8f66" />
+							<rect x="82" y="56" width="56" height="12" rx="2" fill="#ff8f8f66" />
+							<text x="110" y="100" text-anchor="middle" fill="#9aa3b2" font-size="10.5">
+								SSR: 1 column
+							</text>
+							<path d="M158 51 H210" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#a3)" />
+							<text x="184" y="44" text-anchor="middle" fill="#9aa3b2" font-size="9">
+								hydrate+measure
+							</text>
+							<rect
+								x="215"
+								y="16"
+								width="150"
+								height="70"
+								rx="6"
+								fill="#ffcf6e18"
+								stroke="#ffcf6e"
+							/>
+							<text x="290" y="46" text-anchor="middle" fill="#ffcf6e" font-size="11">
+								⚡ REFLOW
+							</text>
+							<text x="290" y="62" text-anchor="middle" fill="#9aa3b2" font-size="10">
+								jumps to 4 columns
+							</text>
+							<text x="290" y="100" text-anchor="middle" fill="#9aa3b2" font-size="10.5">
+								visible flash / shift
+							</text>
+
+							<!-- with initialColumns -->
+							<text x="0" y="160" fill="#7ee0c0" font-size="12" font-weight="700">Fixed</text>
+							<rect
+								x="70"
+								y="128"
+								width="150"
+								height="70"
+								rx="6"
+								fill="#7ee0c018"
+								stroke="#7ee0c0"
+							/>
+							<g fill="#7ee0c066">
+								<rect x="78" y="136" width="40" height="34" rx="2" />
+								<rect x="124" y="136" width="40" height="22" rx="2" />
+								<rect x="170" y="136" width="40" height="44" rx="2" />
+							</g>
+							<text x="145" y="212" text-anchor="middle" fill="#9aa3b2" font-size="10.5">
+								SSR already 4 cols (initialColumns)
+							</text>
+							<path d="M228 163 H280" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#a3)" />
+							<rect
+								x="285"
+								y="128"
+								width="150"
+								height="70"
+								rx="6"
+								fill="#7ee0c018"
+								stroke="#7ee0c0"
+							/>
+							<g fill="#7ee0c066">
+								<rect x="293" y="136" width="40" height="34" rx="2" />
+								<rect x="339" y="136" width="40" height="22" rx="2" />
+								<rect x="385" y="136" width="40" height="44" rx="2" />
+							</g>
+							<text x="360" y="212" text-anchor="middle" fill="#7ee0c0" font-size="10.5">
+								no jump — same layout
+							</text>
+							<defs>
+								<marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+									<path d="M0,0 L6,3 L0,6" fill="#9aa3b2" />
+								</marker>
+							</defs>
+						</svg>
+					</div>
+					<div class="callout">
+						Alternative for the no-JS frame: render a CSS <code>columns</code> fallback until
+						measurement kicks in. Either way the goal is the same — no 1-column flash.
+					</div>
+				</section>
+
+				<!-- 7. BREAKPOINTS -->
+				<section class="feature" id="breakpoints">
+					<div class="tagline">
+						<h2>7 · Explicit breakpoint columns</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						Today column count is derived from <code>minColumnWidth</code> — "fit as many ~200px
+						columns as you can." That's fluid and great by default. But some designs need
+						<em>exact</em> counts at specific widths. This adds an alternative: a width→count map.
+					</p>
+					<div class="grid2">
+						<div class="card">
+							<h4>Derived (today)</h4>
+							<pre><code>&lt;<span class="fn">Masonry</span> <span class="pr">minColumnWidth</span>=<span class="kw">{</span><span class="str">200</span><span class="kw">}</span> … /&gt;</code></pre>
+							<p style="margin: 8px 0 0; color: var(--muted)">
+								"As many 200px-ish columns as fit." Count changes smoothly with width.
+							</p>
+						</div>
+						<div class="card good">
+							<h4>Explicit breakpoints</h4>
+							<pre><code>&lt;<span class="fn">Masonry</span> <span class="pr">columns</span>=<span class="kw">{{</span> <span class="str">0</span>: <span class="str">1</span>, <span class="str">600</span>: <span class="str">2</span>, <span class="str">1000</span>: <span class="str">4</span> <span class="kw">}}</span> … /&gt;</code></pre>
+							<p style="margin: 8px 0 0; color: var(--muted)">
+								"1 column under 600px, 2 up to 1000px, 4 beyond." Pixel-exact, designer-friendly.
+							</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- 8. STATES -->
+				<section class="feature" id="states">
+					<div class="tagline">
+						<h2>8 · Empty &amp; loading slots</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						A convenience: built-in places to render "nothing here yet" or a skeleton, instead of
+						every caller writing their own <code>{#if items.length === 0}</code> wrapper.
+					</p>
+					<div class="card">
+						<pre><code>&lt;<span class="fn">Masonry</span> <span class="pr">items</span>=<span class="kw">{</span>photos<span class="kw">}</span> …&gt;
+  <span class="kw">{#snippet</span> <span class="fn">empty</span>()<span class="kw">}</span>   <span class="cm">// shown when items is empty</span>
+    &lt;p&gt;No photos yet.&lt;/p&gt;
+  <span class="kw">{/snippet}</span>
+  <span class="kw">{#snippet</span> <span class="fn">children</span>(photo)<span class="kw">}</span> … <span class="kw">{/snippet}</span>
+&lt;/<span class="fn">Masonry</span>&gt;</code></pre>
+					</div>
+				</section>
+
+				<!-- 9. VIRTUALIZATION -->
+				<section class="feature" id="virtual">
+					<div class="tagline">
+						<h2>9 · Virtualization (windowing)</h2>
+						<span class="chip addon">add-on</span>
+					</div>
+					<p class="lead">
+						The big-scale feature. Today <strong>every</strong> item becomes a DOM node — fine for a
+						few hundred, painful for thousands. Virtualization renders only the tiles currently near
+						the viewport and recycles them as you scroll, so 10,000 photos cost the same as ~30.
+					</p>
+					<div class="grid2">
+						<div class="card bad">
+							<h4><span class="dot r"></span>Today — render everything</h4>
+							<svg viewBox="0 0 260 200" role="img" aria-label="all items rendered">
+								<rect x="60" y="6" width="140" height="188" rx="6" fill="none" stroke="#2a2f3a" />
+								<g id="all-tiles"></g>
+								<rect
+									x="6"
+									y="70"
+									width="48"
+									height="60"
+									rx="4"
+									fill="#6ea8fe22"
+									stroke="#6ea8fe"
+								/>
+								<text x="30" y="104" text-anchor="middle" fill="#6ea8fe" font-size="10">
+									viewport
+								</text>
+								<text x="130" y="14" text-anchor="middle" fill="#9aa3b2" font-size="9">
+									DOM nodes: 5000
+								</text>
+							</svg>
+						</div>
+						<div class="card good">
+							<h4><span class="dot g"></span>Virtualized — render the window</h4>
+							<svg viewBox="0 0 260 200" role="img" aria-label="only visible items rendered">
+								<rect x="60" y="6" width="140" height="188" rx="6" fill="none" stroke="#2a2f3a" />
+								<g id="win-tiles"></g>
+								<rect
+									x="58"
+									y="68"
+									width="144"
+									height="66"
+									rx="4"
+									fill="#7ee0c00f"
+									stroke="#7ee0c0"
+									stroke-dasharray="4 3"
+								/>
+								<rect
+									x="6"
+									y="70"
+									width="48"
+									height="60"
+									rx="4"
+									fill="#6ea8fe22"
+									stroke="#6ea8fe"
+								/>
+								<text x="30" y="104" text-anchor="middle" fill="#6ea8fe" font-size="10">
+									viewport
+								</text>
+								<text x="130" y="14" text-anchor="middle" fill="#9aa3b2" font-size="9">
+									DOM nodes: ~30
+								</text>
+							</svg>
+						</div>
+					</div>
+					<div class="callout warn">
+						<strong>Why it's an add-on, not core:</strong> to skip rendering off-screen tiles, you
+						must <em>reserve their space</em> — which means knowing/measuring their heights and
+						absolutely positioning them. That's exactly the "fixed-frame" technique this library
+						deliberately avoids (it's what can clip a tile). So virtualization lives in a separate
+						opt-in module (e.g. <code>@nicbat/svelte-masonry/virtual</code>) with its own
+						trade-offs, leaving the core clip-proof.
+					</div>
+				</section>
+
+				<!-- 10. FLIP -->
+				<section class="feature" id="flip">
+					<div class="tagline">
+						<h2>10 · FLIP reflow animation</h2>
+						<span class="chip optin">opt-in</span>
+					</div>
+					<p class="lead">
+						When the column count changes (e.g. you resize past a breakpoint), every tile instantly
+						<em>jumps</em> to its new spot. FLIP is a technique that smoothly animates those jumps
+						instead. Press play to compare.
+					</p>
+					<div class="grid2">
+						<div class="card">
+							<h4>Without (today) — instant jump</h4>
+							<div class="masonry-mock" id="flip-off" style="min-height: 150px"></div>
+						</div>
+						<div class="card good">
+							<h4>With FLIP — animated</h4>
+							<div class="masonry-mock" id="flip-on" style="min-height: 150px"></div>
+						</div>
+					</div>
+					<button class="play" id="flip-play" style="margin-top: 12px">
+						▶ Toggle column count (3 ⇄ 4)
+					</button>
+					<div class="callout good">
+						<strong>Built into the core as a boolean</strong> (<code>animate={true}</code>, default
+						<code>false</code>). FLIP measures <em>positions</em> and animates with
+						<code>transform</code> — a compositor-only effect that never participates in layout, so
+						it <strong>can't clip a tile</strong> and is fully compatible with the invariant (unlike
+						virtualization). Off-cost: zero behavior + ~1&nbsp;KB. The one wrinkle: tiles live in
+						separate per-column <code>{#each}</code> blocks, so cross-column moves need a small
+						<em>manual</em> FLIP rather than Svelte's built-in <code>animate:flip</code> directive.
+					</div>
+				</section>
+
+				<!-- 11. NATIVE -->
+				<section class="feature" id="native">
+					<div class="tagline">
+						<h2>11 · Native <code>grid-lanes</code> backend</h2>
+						<span class="chip addon">add-on</span>
+					</div>
+					<p class="lead">
+						Browsers are adding a built-in masonry mode (<code>display: grid-lanes</code>). When
+						it's widely supported, the same component could emit native lanes instead of JS-managed
+						columns — same props, but the browser does the packing, and (bonus)
+						<strong>source order is preserved</strong>, fixing the reading-order issue from #1.
+					</p>
+					<div class="card">
+						<svg viewBox="0 0 640 150" role="img" aria-label="one API two strategies">
+							<rect x="240" y="10" width="160" height="40" rx="8" fill="#1e222b" stroke="#6ea8fe" />
+							<text x="320" y="35" text-anchor="middle" fill="#e6e9ef" font-size="12">
+								&lt;Masonry … /&gt; (same props)
+							</text>
+							<path d="M300 52 L180 92" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#a4)" />
+							<path d="M340 52 L470 92" stroke="#9aa3b2" stroke-width="1.5" marker-end="url(#a4)" />
+							<rect
+								x="40"
+								y="95"
+								width="270"
+								height="46"
+								rx="8"
+								fill="#6ea8fe12"
+								stroke="#6ea8fe"
+							/>
+							<text x="175" y="115" text-anchor="middle" fill="#e6e9ef" font-size="11.5">
+								strategy="columns" (today)
+							</text>
+							<text x="175" y="131" text-anchor="middle" fill="#9aa3b2" font-size="10">
+								JS flex columns · clip-proof · works everywhere
+							</text>
+							<rect
+								x="335"
+								y="95"
+								width="270"
+								height="46"
+								rx="8"
+								fill="#7ee0c012"
+								stroke="#7ee0c0"
+							/>
+							<text x="470" y="115" text-anchor="middle" fill="#e6e9ef" font-size="11.5">
+								strategy="native" (when supported)
+							</text>
+							<text x="470" y="131" text-anchor="middle" fill="#9aa3b2" font-size="10">
+								browser grid-lanes · source order kept
+							</text>
+							<defs>
+								<marker id="a4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+									<path d="M0,0 L6,3 L0,6" fill="#9aa3b2" />
+								</marker>
+							</defs>
+						</svg>
+					</div>
+					<div class="callout warn">
+						<strong>Not yet:</strong> as of 2026 <code>grid-lanes</code> ships only behind browser
+						flags. This is a "design the seam now, flip it on later" item — and native still won't
+						give you content-balancing or virtualization, so the library keeps earning its place.
+					</div>
+				</section>
+
+				<!-- 12. NON-GOALS -->
+				<section class="feature" id="nongoals">
+					<div class="tagline">
+						<h2>12 · Deliberate non-goals</h2>
+						<span class="chip nope">non-goal</span>
+					</div>
+					<p class="lead">
+						Staying minimal means saying no on purpose. These belong to heavier libraries (e.g.
+						Muuri) and would betray the dependency-free, clip-proof promise:
+					</p>
+					<div class="grid2">
+						<div class="card bad">
+							<h4>✗ Drag-and-drop reordering</h4>
+							<p style="margin: 0; color: var(--muted)">
+								Needs absolute positioning + hit-testing; a different kind of component.
+							</p>
+						</div>
+						<div class="card bad">
+							<h4>✗ Built-in filter / sort animations</h4>
+							<p style="margin: 0; color: var(--muted)">
+								Show/hide choreography is app-specific and heavy; compose it outside.
+							</p>
+						</div>
+					</div>
+					<div class="callout">
+						Documenting non-goals is a feature too — it tells contributors (and future you) where
+						the line is, so the core stays tiny.
+					</div>
+				</section>
+
+				<footer class="end">
+					Built as a companion to <a href="./MASONRY-RESEARCH.md">MASONRY-RESEARCH.md</a>. Diagrams
+					are illustrative mockups, not the real component. Play with the actual packing algorithm
+					in <a href="./playground.html">playground.html</a>.
+				</footer>
+			</main>
+		</div>
+
+		<script>
+			// shared palette
+			const C = ['#6ea8fe', '#7ee0c0', '#ffcf6e', '#ff8f8f', '#b69cff', '#74d3ff', '#9aa3b2'];
+
+			// helper: build a numbered tile
+			function tile(n, h, color) {
+				const d = document.createElement('div');
+				d.className = 't';
+				d.style.height = h + 'px';
+				d.style.background = color;
+				d.textContent = n;
+				return d;
+			}
+			// helper: build a column-distributed mock from a list of {n,h} into k columns (row-major → shortest col)
+			function buildMock(host, heights, k, gapCol, gapRow) {
+				host.innerHTML = '';
+				host.style.gap = (gapCol ?? 8) + 'px';
+				const cols = Array.from({ length: k }, () => []);
+				const tot = new Array(k).fill(0);
+				heights.forEach((h, i) => {
+					let s = 0;
+					for (let j = 1; j < k; j++) if (tot[j] < tot[s]) s = j;
+					cols[s].push({ n: i + 1, h });
+					tot[s] += h;
+				});
+				cols.forEach((c) => {
+					const col = document.createElement('div');
+					col.className = 'col';
+					col.style.gap = (gapRow ?? 8) + 'px';
+					c.forEach(({ n, h }) => col.appendChild(tile(n, h, C[(n - 1) % C.length])));
+					host.appendChild(col);
+				});
+				return cols;
+			}
+
+			const sample = [44, 30, 56, 36, 48, 28, 52, 34, 40]; // 9 tiles, varied heights
+
+			// 1. reading order — visual (numbers in reading order) vs DOM (column order)
+			const visualCols = buildMock(document.getElementById('ro-visual'), sample, 3);
+			const domCols = buildMock(document.getElementById('ro-dom'), sample, 3);
+			// compute DOM traversal sequence (column-major)
+			const domSeq = [];
+			domCols.forEach((c) => c.forEach(({ n }) => domSeq.push(n)));
+			document.getElementById('ro-domseq').textContent =
+				'Runs down each column: ' + domSeq.join(', ');
+
+			// play screen-reader traversal: highlight tiles in DOM order
+			document.getElementById('ro-play').addEventListener('click', () => {
+				const tiles = [...document.getElementById('ro-dom').querySelectorAll('.t')];
+				// tiles are already in DOM (column-major) order
+				tiles.forEach((t) => (t.style.outline = 'none'));
+				let i = 0;
+				const iv = setInterval(() => {
+					tiles.forEach((t) => (t.style.outline = 'none'));
+					if (i >= tiles.length) {
+						clearInterval(iv);
+						return;
+					}
+					const t = tiles[i];
+					t.style.outline = '3px solid #fff';
+					t.style.outlineOffset = '2px';
+					i++;
+				}, 420);
+			});
+
+			// 4. gaps
+			buildMock(document.getElementById('gap-uniform'), sample.slice(0, 6), 3, 14, 14);
+			buildMock(document.getElementById('gap-split'), sample.slice(0, 6), 3, 24, 6);
+
+			// 9. virtualization mockups (SVG tile stacks)
+			function svgTiles(hostId, mode) {
+				const g = document.getElementById(hostId);
+				const ns = 'http://www.w3.org/2000/svg';
+				const xs = [66, 110, 154]; // 3 columns
+				const colY = [10, 10, 10];
+				for (let i = 0; i < 60; i++) {
+					const c = i % 3;
+					const h = 10 + (i % 4) * 6;
+					const y = colY[c];
+					colY[c] += h + 4;
+					if (y > 200) continue;
+					const visible = y + h > 70 && y < 134; // near "viewport" band
+					const r = document.createElementNS(ns, 'rect');
+					r.setAttribute('x', xs[c]);
+					r.setAttribute('y', y);
+					r.setAttribute('width', 38);
+					r.setAttribute('height', h);
+					r.setAttribute('rx', 3);
+					if (mode === 'all') {
+						r.setAttribute('fill', '#ff8f8f33');
+						r.setAttribute('stroke', '#ff8f8f88');
+					} else if (visible) {
+						r.setAttribute('fill', '#7ee0c044');
+						r.setAttribute('stroke', '#7ee0c0');
+					} else {
+						r.setAttribute('fill', 'none');
+						r.setAttribute('stroke', '#2a2f3a');
+						r.setAttribute('stroke-dasharray', '2 2');
+					}
+					g.appendChild(r);
+				}
+			}
+			svgTiles('all-tiles', 'all');
+			svgTiles('win-tiles', 'win');
+
+			// 10. FLIP demo
+			let flipK = 3;
+			const flipOff = document.getElementById('flip-off');
+			const flipOn = document.getElementById('flip-on');
+			const flipData = [40, 30, 50, 34, 44, 28, 38];
+			function renderFlip() {
+				buildMock(flipOff, flipData, flipK);
+				// FLIP: capture old rects, rebuild, animate from old→new
+				const oldRects = new Map();
+				flipOn
+					.querySelectorAll('.t')
+					.forEach((t) => oldRects.set(t.textContent, t.getBoundingClientRect()));
+				buildMock(flipOn, flipData, flipK);
+				flipOn.querySelectorAll('.t').forEach((t) => {
+					const prev = oldRects.get(t.textContent);
+					if (!prev) return;
+					const now = t.getBoundingClientRect();
+					const dx = prev.left - now.left,
+						dy = prev.top - now.top;
+					if (!dx && !dy) return;
+					t.animate(
+						[{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0,0)' }],
+						{ duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' }
+					);
+				});
+			}
+			renderFlip();
+			document.getElementById('flip-play').addEventListener('click', () => {
+				flipK = flipK === 3 ? 4 : 3;
+				renderFlip();
+			});
+		</script>
+	</body>
+</html>

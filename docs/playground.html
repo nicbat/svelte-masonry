@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>@nicbat/svelte-masonry — interactive playground</title>
+		<style>
+			:root {
+				--bg: #0f1115;
+				--panel: #171a21;
+				--panel-2: #1e222b;
+				--line: #2a2f3a;
+				--text: #e6e9ef;
+				--muted: #9aa3b2;
+				--accent: #6ea8fe;
+				--accent-2: #7ee0c0;
+				--warn: #ffcf6e;
+				--bad: #ff8f8f;
+				--radius: 10px;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html,
+			body {
+				margin: 0;
+			}
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font:
+					14px/1.5 ui-sans-serif,
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					sans-serif;
+			}
+			header {
+				padding: 20px 24px 12px;
+				border-bottom: 1px solid var(--line);
+			}
+			header h1 {
+				margin: 0 0 4px;
+				font-size: 18px;
+				letter-spacing: 0.2px;
+			}
+			header p {
+				margin: 0;
+				color: var(--muted);
+				max-width: 70ch;
+			}
+			header code {
+				color: var(--accent-2);
+			}
+			.layout {
+				display: grid;
+				grid-template-columns: 320px 1fr;
+				min-height: calc(100vh - 78px);
+			}
+			@media (max-width: 820px) {
+				.layout {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Controls panel */
+			.controls {
+				background: var(--panel);
+				border-right: 1px solid var(--line);
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				gap: 18px;
+				position: sticky;
+				top: 0;
+				align-self: start;
+				max-height: 100vh;
+				overflow: auto;
+			}
+			.group {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+			.group > h2 {
+				font-size: 11px;
+				text-transform: uppercase;
+				letter-spacing: 0.12em;
+				color: var(--muted);
+				margin: 0;
+				font-weight: 600;
+			}
+			.ctl {
+				display: flex;
+				flex-direction: column;
+				gap: 5px;
+			}
+			.ctl .row {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+			.ctl label {
+				color: var(--text);
+			}
+			.ctl .val {
+				color: var(--accent);
+				font-variant-numeric: tabular-nums;
+				font-weight: 600;
+			}
+			input[type='range'] {
+				width: 100%;
+				accent-color: var(--accent);
+			}
+			.toggle {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				cursor: pointer;
+			}
+			.toggle input {
+				accent-color: var(--accent);
+				width: 16px;
+				height: 16px;
+			}
+			.toggle span {
+				color: var(--text);
+			}
+			.toggle small {
+				color: var(--muted);
+				display: block;
+			}
+			select,
+			button {
+				background: var(--panel-2);
+				color: var(--text);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 7px 9px;
+				font: inherit;
+			}
+			button {
+				cursor: pointer;
+			}
+			button:hover {
+				border-color: var(--accent);
+			}
+
+			/* Stage */
+			.stage {
+				padding: 16px 20px 60px;
+				min-width: 0;
+			}
+			.metrics {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				margin-bottom: 14px;
+			}
+			.metric {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-radius: 8px;
+				padding: 8px 12px;
+				min-width: 96px;
+			}
+			.metric .k {
+				color: var(--muted);
+				font-size: 11px;
+				text-transform: uppercase;
+				letter-spacing: 0.08em;
+			}
+			.metric .v {
+				font-size: 18px;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+			}
+			.metric .v.good {
+				color: var(--accent-2);
+			}
+			.metric .v.warn {
+				color: var(--warn);
+			}
+
+			.note {
+				background: var(--panel);
+				border: 1px solid var(--line);
+				border-left: 3px solid var(--warn);
+				border-radius: 8px;
+				padding: 10px 12px;
+				margin-bottom: 14px;
+				color: var(--muted);
+			}
+			.note strong {
+				color: var(--text);
+			}
+			.note.hidden {
+				display: none;
+			}
+
+			/* Masonry — mirrors src/lib/Masonry.svelte styles */
+			.masonry {
+				display: flex;
+				align-items: flex-start;
+				gap: var(--masonry-gap);
+				width: 100%;
+			}
+			.masonry-column {
+				display: flex;
+				flex: 1 1 0;
+				flex-direction: column;
+				gap: var(--masonry-gap);
+				min-width: 0;
+			}
+
+			.tile {
+				position: relative;
+				border-radius: var(--radius);
+				overflow: hidden;
+				background: var(--panel-2);
+				border: 1px solid var(--line);
+			}
+			.tile .body {
+				width: 100%;
+				display: block;
+			}
+			.tile .footer {
+				padding: 8px 10px;
+				border-top: 1px solid var(--line);
+				color: var(--muted);
+				font-size: 12px;
+			}
+			.tile .badge {
+				position: absolute;
+				top: 6px;
+				left: 6px;
+				background: rgba(0, 0, 0, 0.6);
+				color: #fff;
+				border-radius: 6px;
+				padding: 2px 7px;
+				font-size: 12px;
+				font-weight: 700;
+				font-variant-numeric: tabular-nums;
+				backdrop-filter: blur(2px);
+			}
+			.tile .badge.dom {
+				background: rgba(110, 168, 254, 0.85);
+				top: 6px;
+				left: auto;
+				right: 6px;
+			}
+			.footers-off .tile .footer {
+				display: none;
+			}
+
+			footer.legend {
+				color: var(--muted);
+				margin-top: 18px;
+				font-size: 12px;
+			}
+			footer.legend a {
+				color: var(--accent);
+			}
+			kbd {
+				background: var(--panel-2);
+				border: 1px solid var(--line);
+				border-radius: 5px;
+				padding: 1px 6px;
+				font:
+					12px ui-monospace,
+					monospace;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>@nicbat/svelte-masonry — interactive playground</h1>
+			<p>
+				A faithful vanilla-JS reimplementation of the component's algorithm: items join the
+				<strong>currently shortest column</strong>, with height <em>estimated</em> from an aspect
+				ratio (<code>columnWidth / aspectRatio + footerEstimate</code>) purely to pick a column —
+				never written back as a fixed height. Resize the window or drag the controls.
+			</p>
+		</header>
+
+		<div class="layout">
+			<aside class="controls">
+				<div class="group">
+					<h2>Layout</h2>
+					<div class="ctl">
+						<div class="row">
+							<label for="minw">minColumnWidth</label><span class="val" id="minw-v"></span>
+						</div>
+						<input id="minw" type="range" min="80" max="400" step="10" value="180" />
+					</div>
+					<div class="ctl">
+						<div class="row"><label for="gap">gap</label><span class="val" id="gap-v"></span></div>
+						<input id="gap" type="range" min="0" max="40" step="2" value="14" />
+					</div>
+					<div class="ctl">
+						<div class="row">
+							<label for="footer">footerEstimate</label><span class="val" id="footer-v"></span>
+						</div>
+						<input id="footer" type="range" min="0" max="160" step="4" value="56" />
+					</div>
+				</div>
+
+				<div class="group">
+					<h2>Content</h2>
+					<div class="ctl">
+						<div class="row">
+							<label for="count">item count</label><span class="val" id="count-v"></span>
+						</div>
+						<input id="count" type="range" min="3" max="120" step="1" value="24" />
+					</div>
+					<div class="ctl">
+						<div class="row">
+							<label for="variance">aspect-ratio spread</label
+							><span class="val" id="variance-v"></span>
+						</div>
+						<input id="variance" type="range" min="0" max="100" step="5" value="55" />
+					</div>
+					<div class="ctl">
+						<label for="footer-mode">footer / caption</label>
+						<select id="footer-mode">
+							<option value="varied" selected>Varied captions (1–4 lines)</option>
+							<option value="uniform">Uniform 1-line caption</option>
+							<option value="none">No footer (images only)</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="group">
+					<h2>Demonstrate</h2>
+					<label class="toggle">
+						<input type="checkbox" id="wrong-ar" />
+						<span
+							>Feed <strong>wrong</strong> aspect ratios<small
+								>Estimate breaks; layout must NOT clip — proves the invariant</small
+							></span
+						>
+					</label>
+					<label class="toggle">
+						<input type="checkbox" id="naive" />
+						<span
+							>Naïve round-robin<small>Compare against the shortest-column balancing</small></span
+						>
+					</label>
+					<label class="toggle">
+						<input type="checkbox" id="show-order" checked />
+						<span
+							>Show order badges<small
+								><span style="color: var(--accent-2)">●</span> reading order &nbsp;
+								<span style="color: var(--accent)">●</span> DOM/tab order</small
+							></span
+						>
+					</label>
+					<button id="reseed">↻ Reseed content</button>
+				</div>
+
+				<div class="group">
+					<h2>Reference</h2>
+					<p style="color: var(--muted); margin: 0">
+						See
+						<a href="./MASONRY-RESEARCH.md" style="color: var(--accent)">MASONRY-RESEARCH.md</a> for
+						the feature roadmap &amp; gap analysis.
+					</p>
+				</div>
+			</aside>
+
+			<main class="stage">
+				<div class="metrics">
+					<div class="metric">
+						<div class="k">Container</div>
+						<div class="v" id="m-width">—</div>
+					</div>
+					<div class="metric">
+						<div class="k">Columns</div>
+						<div class="v" id="m-cols">—</div>
+					</div>
+					<div class="metric">
+						<div class="k">Col width</div>
+						<div class="v" id="m-colw">—</div>
+					</div>
+					<div class="metric">
+						<div class="k">Balance (Δ est.)</div>
+						<div class="v" id="m-balance">—</div>
+					</div>
+				</div>
+
+				<div class="note" id="note-order">
+					<strong>Reading-order caveat:</strong> badges show that visual order (green) reads
+					row-major, but <strong>DOM / Tab / screen-reader order (blue) runs column-major</strong> —
+					down column 1, then column 2. Press <kbd>Tab</kbd> through the tiles to feel it. Fine for
+					decorative galleries; a real concern for content whose order carries meaning. (See
+					research doc §5.)
+				</div>
+				<div class="note hidden" id="note-wrong">
+					<strong>Wrong aspect ratios are active.</strong> Column balance gets worse, but notice
+					every tile still renders its full content with no clipping or overlap — that's the whole
+					point.
+				</div>
+
+				<div id="masonry" class="masonry"></div>
+
+				<footer class="legend">
+					The tiles size themselves in normal flow; the script only decides
+					<em>which column</em> each one lands in. That is exactly what
+					<code>src/lib/Masonry.svelte</code> does.
+				</footer>
+			</main>
+		</div>
+
+		<script>
+			// ---- Seeded RNG (a tiny LCG) so renders are stable frame-to-frame ----
+			let seed = 1337;
+			function rng() {
+				seed = (seed * 1664525 + 1013904223) >>> 0;
+				return seed / 4294967296;
+			}
+
+			// ---- Model ----------------------------------------------------------
+			const PALETTE = ['#6ea8fe', '#7ee0c0', '#ffcf6e', '#ff8f8f', '#b69cff', '#74d3ff', '#9aa3b2'];
+			let data = []; // current item set
+			let dataSig = null; // content signature; rebuild data only when this changes
+			let contentSeed = 4242; // seed used to build `data`; bump to reseed content
+
+			function buildData(count, variance, footerMode) {
+				const out = [];
+				for (let i = 0; i < count; i++) {
+					// aspect ratio spread: 0 => all square, 100 => 0.5 .. 2.0
+					const spread = variance / 100;
+					const r = rng();
+					const trueAr = 1 + (r - 0.5) * 2 * spread * 1.0; // ~0.? .. ~2.?
+					const ar = Math.max(0.45, Math.min(2.4, trueAr));
+					let lines = 0;
+					if (footerMode === 'uniform') lines = 1;
+					else if (footerMode === 'varied') lines = 1 + Math.floor(rng() * 4);
+					out.push({
+						id: i,
+						aspectRatio: ar,
+						color: PALETTE[i % PALETTE.length],
+						captionLines: lines
+					});
+				}
+				return out;
+			}
+
+			// ---- Packing — mirrors the $derived.by in Masonry.svelte ------------
+			function pack(items, columnCount, columnWidth, footerEstimate, opts) {
+				const cols = Array.from({ length: columnCount }, () => []);
+				const heights = new Array(columnCount).fill(0);
+				items.forEach((item, idx) => {
+					// aspect ratio used for the estimate (optionally wrong)
+					let ar = item.aspectRatio;
+					if (opts.wrongAr) ar = 0.5 + rng() * 1.8; // deliberately decoupled from true ratio
+					const validAr = ar && ar > 0 ? ar : 1;
+					const estimatedHeight = columnWidth / validAr + footerEstimate;
+
+					let target;
+					if (opts.naive) {
+						target = idx % columnCount; // round-robin
+					} else {
+						target = 0;
+						for (let i = 1; i < columnCount; i++) if (heights[i] < heights[target]) target = i;
+					}
+					cols[target].push({ item, readingIndex: idx });
+					heights[target] += estimatedHeight;
+				});
+				return { cols, heights };
+			}
+
+			// ---- Render ---------------------------------------------------------
+			const el = {
+				masonry: document.getElementById('masonry'),
+				mWidth: document.getElementById('m-width'),
+				mCols: document.getElementById('m-cols'),
+				mColw: document.getElementById('m-colw'),
+				mBalance: document.getElementById('m-balance'),
+				noteOrder: document.getElementById('note-order'),
+				noteWrong: document.getElementById('note-wrong')
+			};
+
+			function readControls() {
+				return {
+					minColumnWidth: +document.getElementById('minw').value,
+					gap: +document.getElementById('gap').value,
+					footerEstimate: +document.getElementById('footer').value,
+					count: +document.getElementById('count').value,
+					variance: +document.getElementById('variance').value,
+					footerMode: document.getElementById('footer-mode').value,
+					wrongAr: document.getElementById('wrong-ar').checked,
+					naive: document.getElementById('naive').checked,
+					showOrder: document.getElementById('show-order').checked
+				};
+			}
+
+			function syncLabels(c) {
+				document.getElementById('minw-v').textContent = c.minColumnWidth + 'px';
+				document.getElementById('gap-v').textContent = c.gap + 'px';
+				document.getElementById('footer-v').textContent = c.footerEstimate + 'px';
+				document.getElementById('count-v').textContent = c.count;
+				document.getElementById('variance-v').textContent = c.variance + '%';
+			}
+
+			function captionText(lines) {
+				const w = [
+					'Soft morning light',
+					'over the harbour',
+					'in late autumn',
+					'near the old pier',
+					'beneath grey skies',
+					'as the tide turned',
+					'with gulls overhead',
+					'long after closing'
+				];
+				let s = [];
+				for (let i = 0; i < lines; i++) s.push(w[(i * 3) % w.length]);
+				return s.join(' ');
+			}
+
+			function render() {
+				const c = readControls();
+				syncLabels(c);
+
+				// Rebuild the item set only when a content control changes (or after reseed),
+				// so dragging layout sliders doesn't shuffle the content. Built from contentSeed.
+				const sig = [c.count, c.variance, c.footerMode, contentSeed].join('|');
+				if (dataSig !== sig) {
+					seed = contentSeed;
+					data = buildData(c.count, c.variance, c.footerMode);
+					dataSig = sig;
+				}
+
+				const width = el.masonry.clientWidth;
+				const columnCount = Math.max(1, Math.floor((width + c.gap) / (c.minColumnWidth + c.gap)));
+				const columnWidth = columnCount > 0 ? (width - c.gap * (columnCount - 1)) / columnCount : 0;
+
+				// packing uses its own rng draws when wrongAr; snapshot seed so render is stable per frame
+				const packSeed = 999;
+				seed = packSeed;
+				const { cols, heights } = pack(data, columnCount, columnWidth, c.footerEstimate, {
+					wrongAr: c.wrongAr,
+					naive: c.naive
+				});
+
+				// metrics
+				const maxH = Math.max(...heights),
+					minH = Math.min(...heights);
+				const delta = Math.round(maxH - minH);
+				el.mWidth.textContent = Math.round(width) + 'px';
+				el.mCols.textContent = columnCount;
+				el.mColw.textContent = Math.round(columnWidth) + 'px';
+				el.mBalance.textContent = delta + 'px';
+				el.mBalance.className = 'v ' + (delta < columnWidth * 0.6 ? 'good' : 'warn');
+
+				// notes
+				el.noteOrder.classList.toggle('hidden', !c.showOrder);
+				el.noteWrong.classList.toggle('hidden', !c.wrongAr);
+
+				// DOM
+				el.masonry.style.setProperty('--masonry-gap', c.gap + 'px');
+				el.masonry.classList.toggle('footers-off', c.footerMode === 'none');
+
+				// compute DOM (column-major) traversal index for each tile
+				let domIndex = 0;
+				const frag = document.createDocumentFragment();
+				for (const col of cols) {
+					const colEl = document.createElement('div');
+					colEl.className = 'masonry-column';
+					for (const { item, readingIndex } of col) {
+						const tile = document.createElement('div');
+						tile.className = 'tile';
+						tile.tabIndex = 0;
+
+						const body = document.createElement('div');
+						body.className = 'body';
+						// real rendered height comes from aspect ratio of the column width — natural flow
+						const h = Math.round(columnWidth / item.aspectRatio);
+						body.style.height = h + 'px';
+						body.style.background = `linear-gradient(135deg, ${item.color}33, ${item.color}11)`;
+						body.style.borderBottom = `2px solid ${item.color}66`;
+						tile.appendChild(body);
+
+						if (c.showOrder) {
+							const r = document.createElement('div');
+							r.className = 'badge';
+							r.style.background = 'rgba(126,224,192,0.85)';
+							r.style.color = '#08130f';
+							r.textContent = readingIndex + 1;
+							tile.appendChild(r);
+
+							const d = document.createElement('div');
+							d.className = 'badge dom';
+							d.style.color = '#06101f';
+							d.textContent = domIndex + 1;
+							tile.appendChild(d);
+						}
+
+						if (c.footerMode !== 'none' && item.captionLines > 0) {
+							const f = document.createElement('div');
+							f.className = 'footer';
+							f.textContent = captionText(item.captionLines);
+							tile.appendChild(f);
+						}
+
+						colEl.appendChild(tile);
+						domIndex++;
+					}
+					frag.appendChild(colEl);
+				}
+				el.masonry.replaceChildren(frag);
+			}
+
+			// ---- Wire up --------------------------------------------------------
+			document.querySelectorAll('input, select').forEach((node) => {
+				node.addEventListener('input', render);
+				node.addEventListener('change', render);
+			});
+			document.getElementById('reseed').addEventListener('click', () => {
+				contentSeed = (Math.random() * 1e9) >>> 0; // new content; sig change forces rebuild
+				render();
+			});
+			window.addEventListener('resize', render);
+			render(); // initial
+		</script>
+	</body>
+</html>
